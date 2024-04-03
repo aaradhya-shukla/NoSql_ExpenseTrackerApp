@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <section  class="vh-100" style="background-color: #9A616D;">
+        <header class="d-flex justify-content-center align-items-center h-40">
+            <h2 id="heading" style="font-weight: bold; font-family: sans-serif; font-style: italic; color: aliceblue;">Expense Tracker</h2>
+        </header>
+        <hr class="fa-long-arrow-right">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-80">
+                <div class="col-md-6">
+                    <div class="card bg-grey"style="border-radius: 1rem">
+                        <div class="card-header">
+                            <h4 class="card-title">Add Expense</h4>
+                        </div>
+                        <form class="" id="my-form">
+                            <input type="number" id="expense" placeholder="Enter Expense" class="form-control"><br>
+                            <input type="text" id="description" placeholder="Enter description" class="form-control"><br>
+                            <select id="category" class="form-control">
+                                <option value="" disabled selected hidden>Choose Category</option>
+                                <option value="Fuel">Fuel</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Food">Food</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Movies">Movies</option>
+                            </select>
+                            <input type="submit" id="btn" value="ADD" class="form-control">
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-black text-white" style="border-radius: 1rem">
+                        <div class="card-header">
+                            <h4 class="card-title">Current Expenses</h4>
+                            <ul id="list">
+                                <h6 id="no" style="font-style: italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">-No expenditure yet</h6>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <ul id="my-downloads" style="list-style-type: circle;"></ul>
+
+            </div>
+            <div id ="prem-div" class="d-flex justify-content-center text-center mt-lg-4 pt-lg-4">
+                <button id="Premium" type="button" class="text-white" style="background-color: grey; height: 2rem;">Buy Premium <i class="fa fa-money"></i></button>
+                <p> </p>
+                <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                <button disabled id="generate" type="button" class="text-white" style="background-color: grey; height: 2rem;">Download Report <i class="fa fa-download"></i></button>
+                <p></p>
+                <button disabled id="history" type="button" class="text-white" style="background-color: grey; height: 2rem;">Download History <i class="fa fa-history"></i></button>
+                <p></p>
+                <button onclick="window.location.replace('./login.html')"  id = "logout" type="button" class="text-white"  style="background-color: grey; height: 2rem;">Log Out <i class="fa fa-power-off"></i></button>
+            </div>
+        </div>
+    </section>
+    <div class="container" style="background-color: hsl(348, 22%, 73%);">
+        <div id= "pagination" class="d-flex justify-content-center text-center mt-lg-4 pt-lg-4">
+            <button id="prev" type="button"  style="display: none;">prev</button>
+            <button id="curr" type="button" value="1"></button>
+            <button id="next" type="button" style="display: none;">next</button>
+        </div>
+        <div class="d-flex justify-content-center text-center mt-lg-4 pt-lg-4">
+            <label for="rows">Rows Per Page</label>
+            <select name="rows" id="rows" oninput="updateRows()">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+            </select>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    
+    <script>
+        const form = document.getElementById('my-form');
+        const row = document.getElementById('my-row');
+        form.addEventListener('submit',addExpense);
+        const ul = document.getElementById('list')
+        const token = localStorage.getItem('token');
+        const Premium = document.getElementById('Premium');
+        Premium.addEventListener('click',buyPremium);
+        let userObj="";
+        const button = document.getElementById('generate');
+        button.addEventListener('click',download);
+        let currentPage = 1;
+        const pagination = document.getElementById('pagination');
+        const prev = document.getElementById('prev')
+        const next = document.getElementById('next');
+        const curr = document.getElementById('curr');
+        // const selectDropdown= document.querySelector('select');
+        // selectDropdown.addEventListener('change',updateRows);
+        let rows = document.getElementById('rows').value
+        curr.textContent=`${currentPage}`;
+        localStorage.setItem('rows',`${rows}`)
+        prev.addEventListener('click',()=>{
+            if (currentPage>1){
+                currentPage-=1
+            }
+            curr.textContent=`${currentPage}`;
+            
+            while(ul.hasChildNodes()){
+                ul.removeChild(ul.firstChild)
+                }
+            let h6=document.createElement('h6');
+            h6.setAttribute('id','no');
+            ul.appendChild(h6)
+
+            getExpense(currentPage)
+        })
+        next.addEventListener('click',()=>{
+            currentPage+=1
+            curr.textContent=`${currentPage}`;
+            while(ul.hasChildNodes()){
+                ul.removeChild(ul.firstChild)
+                }
+            let h6=document.createElement('h6');
+            h6.setAttribute('id','no');
+            ul.appendChild(h6)
+            getExpense(currentPage)
+        })
+
+        function helper(expenses,user,currentPage,haspreviousPage,hasnextPage){
+            
+                if (user.isPremium===true){
+                    document.getElementById('generate').disabled=false;
+                    document.getElementById('history').disabled=false;
+                }
+                if (hasnextPage){
+                    prev.style.display='block';
+                    next.style.display='block';
+                }
+                show(expenses,user);
+                if(expenses.length==0){
+                    alert('You have reached end of data')
+                    next.style.display='none';
+                }
+        }
+        
+       async function getExpense(page){
+        try{
+            let rows = localStorage.getItem('rows')
+            const result = await axios.post(`http://localhost:3000/expense/get-expense?page=${page}`,{rows:rows},{headers:{'authurization':token}});
+            let {expenses,user,currentPage,haspreviousPage,hasnextPage}=result.data;
+            helper(expenses,user,currentPage,haspreviousPage,hasnextPage)
+        }
+        catch(err){
+            console.log(err)
+        }
+        
+        }
+        window.addEventListener('DOMContentLoaded', async ()=>{
+            try{
+            const result = await axios.post(`http://localhost:3000/expense/get-expense?page=1`,{rows:rows},{headers:{'authurization':token}});
+            let {expenses,user,currentPage,haspreviousPage,hasnextPage}=result.data;
+            postPremium(user.isPremium)
+            helper(expenses,user,currentPage,haspreviousPage,hasnextPage)
+        }
+        catch(err){
+            console.log(err)
+        }
+            
+        })
+
+        function updateRows(){
+            rows=document.getElementById('rows').value
+            localStorage.setItem('rows',`${rows}`)
+            while(ul.hasChildNodes()){
+                ul.removeChild(ul.firstChild)
+                }
+            let h6=document.createElement('h6');
+            h6.setAttribute('id','no');
+            ul.appendChild(h6)
+            getExpense(currentPage)
+        }
+        async function addExpense(e){
+            e.preventDefault();
+            try{
+                let expense = document.getElementById('expense').value;
+                let description = document.getElementById('description').value;
+                let category = document.getElementById('category').value;
+                let expObj= {
+                    expense:expense,
+                    description:description,
+                    category:category
+                }
+                const searchParams= new URLSearchParams(window.location.search);
+                // const id = searchParams.get('id');
+                // console.log(id)
+                form.reset();
+                const result = await axios.post('http://localhost:3000/expense/add-expense',expObj,{headers:{authurization:token}});
+                show([result.data.expenses],null)
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+
+        function postPremium(isPremium){
+                if (isPremium){
+                    document.getElementById('prem-div').removeChild(Premium);
+                    console.log("here")
+                    document.getElementById('heading').textContent='Expense Tracker - Premium';
+                    let button = document.createElement('button')
+                    button.setAttribute('type','button');
+                    button.textContent='Premium';
+                    button.setAttribute('onclick',"window.location.replace('./leaderBoard.html')")
+                    button.setAttribute('style','background-color: black; height: 2rem; font-style: italic;color: gold;')
+                    document.getElementById('prem-div').appendChild(button)
+                  }
+        }
+
+        function show(expenses,user){
+            if (expenses.length>0){
+                console.log('here')
+                }
+                document.getElementById('no').style.display="none"
+                for (let i of expenses){
+                    let {_id,expense,description,category} = i
+                    let li = document.createElement('li');
+                    li.textContent = `Rs${expense}-${description}-${category} `;
+                    let del = document.createElement('button')
+                    del.setAttribute('id',`${_id}`);
+                    del.textContent = 'Delete';
+                    del.addEventListener('click',delt);
+                    li.appendChild(del);
+                    ul.appendChild(li)   
+                    
+                }
+            }
+        
+
+        async function delt(e){
+            e.preventDefault();
+            try{
+                const id = e.target.id;
+                const result = await axios.get(`http://localhost:3000/expense/delete-expense/${id}`,{headers:{
+                    authurization:token
+                }})
+                ul.removeChild(e.target.parentNode);
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+
+        async function buyPremium(e){
+            
+            try{
+                const result = await axios.get('http://localhost:3000/purchase/purchase-premium',{headers:{
+                    authurization:token
+                }})
+                console.log("prem:",result);
+                var options={
+                    'key':result.data.key_id,
+                    'order_id':result.data.order.id,
+                    'handler': async (response)=>{
+                        try{
+                            console.log(response)
+                            const res = await axios.post('http://localhost:3000/purchase/updatePurchaseStatus',{
+                                orderId:options.order_id,
+                                paymentId:response.razorpay_payment_id,
+                                status:'SUCCESSFUL'
+                            },{
+                                headers:{
+                                    authurization:token
+                                }
+                            })
+                            if(res.status==201){
+                                alert('You are a premium user now!')
+                                postPremium(true)
+                            }
+                            
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
+                    }
+                }
+                var rzp = new Razorpay(options);
+                rzp.open();
+                e.preventDefault();
+                rzp.on('payment.failed', async function (response){
+                    console.log(response)
+                    alert('payment has failed')
+                    try{
+                        const res = await axios.post('http://localhost:3000/purchase/updatePurchaseStatus',{
+                                orderId:options.order_id,
+                                purchaseId:response.razorpay_payment_id,
+                                status:'FAILED'
+                            },{
+                                headers:{
+                                    authurization:token
+                                }
+                            })
+                    }
+                    catch(err){
+                        console.log(err)
+                    }
+                })
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+        async function download(e){
+            e.preventDefault();
+            try{
+                const result = await axios.get('http://localhost:3000/expense/download-report',{
+                    headers:{
+                        authurization:token
+                    }
+                })
+                if (result.status===200){
+                    var a = document.createElement('a');
+                    a.href=result.data.fileUrl;
+                    console.log(result)
+                    console.log(a)
+                    a.download = 'myexpense.csv';
+                    a.click();
+                }
+                else if (result.status===500){
+                    throw new Error(result.data.msg)
+                }
+            }
+            catch(err){
+                alert(err)
+            }
+        }
+        const historybtn = document.getElementById('history');
+        historybtn.addEventListener('click',historyy);
+        async function historyy(e){
+            e.preventDefault();
+            try{
+                const result = await axios.get('http://localhost:3000/expense/download-history',{
+                    headers:{
+                        authurization:token
+                    }
+                })
+                const downloads = result.data.downloads
+                display(downloads)
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+
+        function display(downloads){
+            if(downloads){
+                const ul = document.getElementById('my-downloads')
+                for(i of downloads){
+                    let {id,url,createdAt} = i;
+                    let li = document.createElement('li');
+                    li.innerHTML=`<a href='${url}'>My Expense_${id}-${createdAt}</a>`;
+                    ul.appendChild(li)
+                }
+            }
+        }
+    </script>
+</body>
+</html>

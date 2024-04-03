@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- <meta https-equiv="Content-Security-Policy" content="default-src *;" /> -->
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+/* Button used to open the contact form - fixed at the bottom of the page */
+
+/* The popup form - hidden by default */
+.form-popup {
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  right: 15px;
+  border: 3px solid #f1f1f1;
+  z-index: 9;
+}
+
+/* Add styles to the form container */
+.form-container {
+  max-width: 300px;
+  padding: 10px;
+  background-color: white;
+}
+
+/* Full-width input fields */
+.form-container input[type=text], .form-container input[type=password] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  border: none;
+  background: #f1f1f1;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/login button */
+.form-container .btn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom:10px;
+  opacity: 0.8;
+}
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<h2>Password Reset</h2>
+<div class="form-popup" >
+  <form class="form-container" id="myForm">
+    <h1>Login</h1>
+    <input type="text" placeholder="Enter Email" name="email" required id="email">
+    <input type="password" placeholder="Enter new Password" name="psw" required id="password">
+    <button id = reset type="submit" class="btn">Reset</button>
+  </form>
+</div>
+<script src="reset.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script> -->
+<script>
+// var req = new XMLHttpRequest();
+// req.open('GET',document.location, false);
+// req.send(null);
+// var headers = req.getAllResponseHeaders()
+// console.log(headers);
+// const form = document.getElementById('myForm');
+// form.addEventListener('submit',reset);
+// async function reset(e){
+//     console.log('here')
+//     const email = document.getElementById('email').value;
+//     const password = document.getElementById('password').value;
+//     let resetObj={
+//         email:email,
+//         newPassword:password
+//     }
+//     e.preventDefault()
+//     try{
+//         const result = await axios.post('http://localhost:3000/password/Updatepassword',resetObj)
+//     }
+//     catch(err){
+//         console.log(err);
+//     }
+// }
+</script>
+
+</body>
+</html>

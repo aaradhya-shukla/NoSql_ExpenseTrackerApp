@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .gradient-custom {
+        /* fallback for old browsers */
+        background: #00f3df;
+
+        /* Chrome 10-25, Safari 5.1-6 */
+        background: -webkit-linear-gradient(to right, rgb(17, 203, 187), rgb(116, 252, 37));
+
+        /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        background: linear-gradient(to right, rgb(17, 203, 187), rgb(205, 252, 37))
+
+        }
+        /* The popup form - hidden by default */
+.form-popup {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  right: 15px;
+  border: 3px solid #f1f1f1;
+  z-index: 9;
+}
+
+/* Add styles to the form container */
+.form-container {
+  max-width: 300px;
+  padding: 10px;
+  background-color: white;
+}
+
+/* Full-width input fields */
+.form-container input[type=text], .form-container input[type=password] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  border: none;
+  background: #f1f1f1;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/login button */
+.form-container .btn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom:10px;
+  opacity: 0.8;
+}
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+  opacity: 1;
+}
+    </style>
+        
+</head>
+<body>
+    <section class="vh-100 gradient-custom"> 
+        <div class="container py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+              <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                <div class="card-body p-5 text-center">
+      
+                  <div class="mb-md-5 mt-md-4 pb-5">
+      
+                    <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
+                    <p class="text-white-50 mb-5">Please enter your login and password!</p>
+
+                    <form class="form-outline form-white mb-4" id="my-form">
+                      <input type="email" id="email" class="form-control form-control-lg"  placeholder="Email" required>
+                      <!-- <label class="form-label" for="typeEmailX">Email</label> -->
+                      <br>
+                      <input type="password" id="password" class="form-control form-control-lg" placeholder="Password" required>
+                      <!-- <label class="form-label" for="typePasswordX">Password</label> -->
+                      <br>
+                      <input class="btn btn-outline-light btn-lg px-5" type="submit" id="btn" value="Login">
+                    </form>
+                    
+      
+                    <div class="d-flex justify-content-center text-center mt-4 pt-1">
+                      <a href="#!" class="text-white"><i class="fa fa-facebook-f fa-lg"></i></a>
+                      <a href="#!" class="text-white"><i class="fa fa-twitter fa-lg mx-4 px-2"></i></a>
+                      <a href="#!" class="text-white"><i class="fa fa-google fa-lg"></i></a>
+                    </div>
+
+                    <div>
+                      <p class="mb-0">Don't have an account? <a href="./SignUp.html" class="text-white-50 fw-bold">Sign Up</a>
+                      </p>
+                    </div>
+                    <p class="mb-0">Forgot Password? <a id="open-form" onclick="openForm();return false"  href="" class="text-white-50 fw-bold">Click Me!</a>
+                    </p>
+                  </div>
+      
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-popup" id="myForm">
+          <form class="form-container">
+            <h4>Request for password change</h4>
+            <input type="text" placeholder="Enter Email" name="email" required id="email-reset">  
+            <button type="button" class="btn" id="password-btn">Send request mail</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+          </form>
+        </div>
+      </section>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script>
+      const form = document.getElementById('my-form');
+      form.addEventListener('submit',login);
+
+      async function login(e){
+        e.preventDefault()
+        try{
+          let email = document.getElementById('email').value;
+          let password = document.getElementById('password').value;
+          let userObj = {
+            email:email,
+            password:password
+          }
+          const result = await axios.post('http://localhost:3000/user/login',userObj);
+          form.reset()
+          alert('User logged in Successfully');
+          if (result.status==200){
+            console.log(result)
+            localStorage.setItem('token',`${result.data.token}`);
+            return location.replace('./expense.html')
+          }
+
+        }
+        catch(err){
+          if(err.response.data.msg=='user not found' || err.response.data.msg=='wrong password'){
+            alert(err.response.data.msg);
+          }
+          console.log(err.response.data)
+        }
+      }
+
+      function openForm() {
+        document.getElementById("myForm").style.display = "block";
+        createBtn();
+      }
+
+      function closeForm() {
+        document.getElementById("myForm").style.display = "none";
+      }
+
+      function createBtn(){
+        const reset = document.getElementById('password-btn');
+        reset.addEventListener('click',passReset);
+      }
+      
+      async function passReset(e){
+        console.log('heree')
+        e.preventDefault()
+        try{
+          const res = await axios.post('http://localhost:3000/password/forgotpassword',{
+            email:document.getElementById('email-reset').value
+          })
+        }
+        catch(err){
+          console.log(err)
+        }
+      }
+    </script>
+    
+</body>
+</html>

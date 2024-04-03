@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <meta http-equiv="Content-Security-Policy"
+  <!-- content="
+  script-src 'sha256-V77bUFdTCxRzgGd7YZkd8d5yPcILZlX6xI26kVevPLc=' 'unsafe-inline'
+"> --> -->
+  <title>Document</title>
+</head>
+<body>
+  <form id="my-form">
+    <input type="email" id="email">
+    <input type="password" id="password">
+    <input type="submit" value="reset">
+  </form>
+  <script>
+    console.log('jbdshhfihiohiahi')
+    var req = new XMLHttpRequest();
+    req.open('POST','http://localhost:3000/password/Updatepassword',true)
+    const form = document.getElementById('my-form');
+    console.log(req)
+    form.addEventListener('submit',async ()=>{
+      console.log("heree>>")
+      let email = document.getElementById('email').value;
+      let password = document.getElementById('password').value;
+      let object = {
+        email:email,
+        newPassword:password
+      }
+      try{
+        const result = await req.send(object)
+      }
+      catch(err){
+        console.log(err);
+      }
+    })
+  </script>
+</body>
+</html>
